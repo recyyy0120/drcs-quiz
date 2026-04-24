@@ -92,25 +92,26 @@
 <body>
 
 <div id="app">
+<div id="app">
     <div id="intro-screen">
         <h1>测测你是解构者宇宙里的谁？</h1>
         <p class="eng-title">Which Character Are You in Deconstructor's COSMOs?</p>
-        <button class="primary-btn" onclick="startLoading()">开始测试</button>
+        <button class="primary-btn" id="start-btn" onclick="startLoading()">开始测试</button>
         <p class="notice">注意事项：在测试的两种情况中，你应选择更有可能倾向的思维，并不代表你一定会那样想。</p>
     </div>
 
     <div id="loading-screen" class="hidden">
-        <h2 class="pulse">正在连接解构者...</h2>
+        <h2 class="pulse" id="loading-text">正在连接解构者...</h2>
         <p style="font-size: 0.8rem; color: #7dd3fc; letter-spacing: 2px; margin-top: 10px; font-weight: bold;">Connecting Rechael</p>
     </div>
-    
+
     <div id="quiz-screen" class="hidden">
         <div class="progress-container"><div id="progress-bar"></div></div>
-        
+
         <div id="question-area">
             <p style="font-size: 0.75rem; color: #7dd3fc; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px;">NEURAL FLOW SYNCING</p>
             <div class="scenario-box" id="scenario-text">加载中...</div>
-            
+
             <div class="scale-container" id="scale-area">
                 <div class="labels-row">
                     <div class="scale-label" id="label-left" style="text-align: left;"></div>
@@ -124,28 +125,33 @@
                     <button class="dot-btn" onclick="handleSelect(5)"></button>
                 </div>
             </div>
-            <p id="hint-text" style="font-size: 0.75rem; color: #94a3b8; margin-top: 12px; line-height: 1.5;">你应选择更有可能倾向的思维，并不代表你一定会那样想。<br>如果两个选择你<b>都</b>不喜欢，请选择中立。</p>
             
+            <p id="hint-text" style="font-size: 0.75rem; color: #94a3b8; margin-top: 12px; line-height: 1.5;">你应选择更有可能倾向的思维，并不代表你一定会那样想。<br>如果两个选择你<b>都</b>不喜欢，请选择中立。</p>
+
             <button id="prev-btn" onclick="goPrev()" class="hidden" style="margin-top: 15px; background: none; border: 1px solid #cbd5e1; padding: 8px 20px; border-radius: 20px; color: #64748b; cursor: pointer; transition: 0.3s;">返回上一题</button>
         </div>
 
         <div id="submit-area" class="hidden" style="margin-top: 30px;">
             <p style="color: #0369a1; font-size: 1.1rem; margin-bottom: 30px; font-weight: 500;">所有维度数据已记录完毕。</p>
-            <button class="primary-btn" onclick="finish()">提交</button>
+            <button class="primary-btn" onclick="finish()">提交并生成解析</button>
         </div>
     </div>
 
-             <div id="trait-analysis-area">
+    <div id="result-screen" class="hidden">
+        <p class="similarity-label">溯源完成 | 契合度 <span id="similarity-score"></span>%</p>
+        <h1 id="res-name"></h1>
+        
+        <p id="res-desc" style="font-size: 1rem; color: #64748b; margin-top: -5px; margin-bottom: 25px; line-height: 1.6; padding: 0 20px; font-style: italic;"></p>
+        
+        <div id="trait-analysis-area">
             <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px; margin-top: 25px;">核心意识特征：</p>
             <div id="top-traits-tags"></div>
             <div id="top-traits-desc"></div>
         </div>
         
         <button class="primary-btn" onclick="location.reload()" style="margin-top: 35px; background: white; color: #0ea5e9; border: 2px solid #e0f2fe;">重新连入</button>
-        
-    </div> </div> <script>
-
-    </div> 
+    </div>
+</div>
     <script>
 </div>
 
