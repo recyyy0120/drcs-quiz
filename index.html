@@ -173,11 +173,11 @@
         { name: "休伯特 (Hubert)", scores: { resonance:2, freedom:3, restraint:2, mastery:10, insight:9, concealment:2, shaping:8, sensibility:2, self:8 } },
         { name: "路克 (Luke)", scores: { resonance:5, freedom:8, restraint:2, mastery:10, insight:7, concealment:9, shaping:8, sensibility:10, self:10 } },
         { name: "塞西莉亚 (Cecilia)", scores: { resonance:8, freedom:6, restraint:4, mastery:2, insight:6, concealment:1, shaping:5, sensibility:8, self:6 } },
-        { name: "埃洛伊丝 (Eloise)", scores: { resonance:10, freedom:8, restraint:0, mastery:9, insight:10, concealment:10, shaping:10, sensibility:10, self:10 }, isDivine: true },
+        { name: "埃洛伊丝 (Eloise)", scores: { resonance:10, freedom:8, restraint:0, mastery:9, insight:10, concealment:10, shaping:10, sensibility:10, self:10 } },
         { name: "阿尔文·德莱尼 (Arvin Delaney)", scores: { resonance:5, freedom:10, restraint:9, mastery:1, insight:5, concealment:7, shaping:5, sensibility:8, self:2 } },
         { name: "乌苏拉·赫斯 (Ursula Hess)", scores: { resonance:2, freedom:5, restraint:10, mastery:4, insight:10, concealment:9, shaping:8, sensibility:1, self:8 } },
         { name: "海伦·本内特 (Helen Bennett)", scores: { resonance:8, freedom:6, restraint:6, mastery:5, insight:9, concealment:2, shaping:10, sensibility:8, self:6 } },
-        { name: "地球天使 (earthangel)", scores: { resonance:10, freedom:10, restraint:0, mastery:10, insight:10, concealment:0, shaping:10, sensibility:10, self:10 }, isDivine: true },
+        { name: "地球天使 (earthangel)", scores: { resonance:10, freedom:10, restraint:0, mastery:10, insight:10, concealment:0, shaping:10, sensibility:10, self:10 } },
         { name: "旧愿 (frynwiln)", scores: { resonance:5, freedom:0, restraint:10, mastery:10, insight:10, concealment:10, shaping:10, sensibility:5, self:5 } },
         { name: "塞勒斯·雷文 (Cyrus Raven)", scores: { resonance:1, freedom:10, restraint:5, mastery:6, insight:8, concealment:2, shaping:8, sensibility:7, self:9 } },
         { name: "海莉 (Hailey)", scores: { resonance:9, freedom:8, restraint:4, mastery:2, insight:8, concealment:3, shaping:8, sensibility:7, self:4 } },
@@ -286,25 +286,61 @@ const questions = [
     }
 
     function finish() {
+    function finish() {
         hide('quiz-screen');
         show('result-screen');
 
-        // 提交时，开始统一算分
-        let scores = { resonance:0, freedom:0, restraint:0, mastery:0, insight:0, concealment:0, shaping:0, sensibility:0, self:0 };
-        
-        for (let i = 0; i < questions.length; i++) {
-            let choice = userChoices[i];
-            let q = questions[i];
-            if (!choice) continue;
+        // 封顶处理
+        for (let k in scores) if (scores[k] > 10) scores[k] = 10;
 
-            if (choice < 3) {
-                let pts = choice === 1 ? 2 : 1;
-                q.tL.forEach(t => scores[t] += pts);
-            } else if (choice > 3) {
-                let pts = choice === 5 ? 2 : 1;
-                q.tR.forEach(t => scores[t] += pts);
+        // 1. 计算排名前两位的显著特质
+        let sortedTraits = Object.keys(scores).sort((a,b) => scores[b] - scores[a]);
+        let t1 = sortedTraits[0], t2 = sortedTraits[1];
+
+        // 2. 核心匹配逻辑：余弦相似度 (Cosine Similarity)
+        let totalScoreSum = Object.values(scores).reduce((a,b) => a+b, 0);
+        let bestMatch = null;
+        let maxSimilarity = -1; // 寻找相似度最高的值，而不是距离最短的值
+
+        characters.forEach(char => {
+
+            let dotProduct = 0;
+            let normUser = 0;
+            let normChar = 0;
+
+            // 计算向量点积与各自的模长
+            for (let k in scores) {
+                dotProduct += scores[k] * char.scores[k];
+                normUser += Math.pow(scores[k], 2);
+                normChar += Math.pow(char.scores[k], 2);
             }
-        }
+
+            let sim = 0;
+            if (normUser > 0 && normChar > 0) {
+                sim = dotProduct / (Math.sqrt(normUser) * Math.sqrt(normChar)); // 取值范围 0 到 1
+            }
+
+            if (sim > maxSimilarity) {
+                maxSimilarity = sim;
+                bestMatch = char;
+            }
+        });
+
+        // 3. 结果渲染
+        // 将 0-1 的相似度转换为更直观的百分比
+        let finalPercentage = Math.round(maxSimilarity * 100);
+        if (finalPercentage > 99) finalPercentage = 99; // 防止出现 100% 溢出感
+
+        document.getElementById('similarity-score').innerText = finalPercentage;
+        document.getElementById('res-name').innerText = bestMatch.name;
+
+        // 渲染两大核心特质解析
+        document.getElementById('top-traits-tags').innerHTML = 
+            `<span class="trait-tag">${traitNames[t1]}</span> <span class="trait-tag">${traitNames[t2]}</span>`;
+        document.getElementById('top-traits-desc').innerHTML = 
+            `<div class="trait-desc"><b>${traitNames[t1]}：</b>${traitDict[t1]}</div>` +
+            `<div class="trait-desc"><b>${traitNames[t2]}：</b>${traitDict[t2]}</div>`;
+    }
 
         // 封顶处理与后续匹配逻辑保持不变
         for (let k in scores) if (scores[k] > 10) scores[k] = 10;
@@ -317,7 +353,6 @@ const questions = [
         let minDistance = Infinity;
 
         characters.forEach(char => {
-            if (char.isDivine && totalScoreSum < 45) return; 
 
             let dist = 0;
             for (let k in scores) {
