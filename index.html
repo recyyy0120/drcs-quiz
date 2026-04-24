@@ -138,6 +138,7 @@
     <div id="result-screen" class="hidden">
         <p class="similarity-label">溯源完成 | 契合度 <span id="similarity-score"></span>%</p>
         <h1 id="res-name"></h1>
+    <p id="res-desc" style="font-size: 1rem; color: #64748b; margin-top: -5px; margin-bottom: 25px; line-height: 1.6; padding: 0 20px; font-style: italic;"></p
         <div id="trait-analysis-area">
             <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px; margin-top: 25px;">核心意识特征：</p>
             <div id="top-traits-tags"></div>
@@ -167,23 +168,25 @@
     };
 
     const characters = [
-        { name: "罗克西 (Roxy)", scores: { resonance:7, freedom:7, restraint:7, mastery:2, insight:8, concealment:7, shaping:4, sensibility:8, self:5 } },
-        { name: "弗雷德 (Fred)", scores: { resonance:6, freedom:8, restraint:8, mastery:1, insight:6, concealment:9, shaping:5, sensibility:8, self:4 } },
-        { name: "雷娅拉 (Rayala)", scores: { resonance:4, freedom:4, restraint:5, mastery:7, insight:9, concealment:6, shaping:10, sensibility:5, self:2 } },
-        { name: "休伯特 (Hubert)", scores: { resonance:2, freedom:3, restraint:2, mastery:10, insight:9, concealment:2, shaping:8, sensibility:2, self:8 } },
-        { name: "路克 (Luke)", scores: { resonance:5, freedom:8, restraint:2, mastery:10, insight:7, concealment:9, shaping:8, sensibility:10, self:10 } },
-        { name: "塞西莉亚 (Cecilia)", scores: { resonance:8, freedom:6, restraint:4, mastery:2, insight:6, concealment:1, shaping:5, sensibility:8, self:6 } },
-        { name: "埃洛伊丝 (Eloise)", scores: { resonance:10, freedom:8, restraint:0, mastery:9, insight:10, concealment:10, shaping:10, sensibility:10, self:10 } },
-        { name: "阿尔文·德莱尼 (Arvin Delaney)", scores: { resonance:5, freedom:10, restraint:9, mastery:1, insight:5, concealment:7, shaping:5, sensibility:8, self:2 } },
-        { name: "乌苏拉·赫斯 (Ursula Hess)", scores: { resonance:2, freedom:5, restraint:10, mastery:4, insight:10, concealment:9, shaping:8, sensibility:1, self:8 } },
-        { name: "海伦·本内特 (Helen Bennett)", scores: { resonance:8, freedom:6, restraint:6, mastery:5, insight:9, concealment:2, shaping:10, sensibility:8, self:6 } },
-        { name: "地球天使 (earthangel)", scores: { resonance:10, freedom:10, restraint:0, mastery:10, insight:10, concealment:0, shaping:10, sensibility:10, self:10 } },
-        { name: "旧愿 (frynwiln)", scores: { resonance:5, freedom:0, restraint:10, mastery:10, insight:10, concealment:10, shaping:10, sensibility:5, self:5 } },
-        { name: "塞勒斯·雷文 (Cyrus Raven)", scores: { resonance:1, freedom:10, restraint:5, mastery:6, insight:8, concealment:2, shaping:8, sensibility:7, self:9 } },
-        { name: "海莉 (Hailey)", scores: { resonance:9, freedom:8, restraint:4, mastery:2, insight:8, concealment:3, shaping:8, sensibility:7, self:4 } },
-        { name: "阿谱尔 (April)", scores: { resonance:9, freedom:9, restraint:5, mastery:8, insight:6, concealment:6, shaping:2, sensibility:4, self:1 } },
-        { name: "尤金·罗伯特·希尔 (Eugene Robert Hills)", scores: { resonance:8, freedom:2, restraint:9, mastery:2, insight:7, concealment:9, shaping:1, sensibility:7, self:4 } },
-        { name: "霓虹 (Neon)", scores: { resonance:5, freedom:9, restraint:9, mastery:2, insight:7, concealment:10, shaping:5, sensibility:7, self:1 } }
+        { name: "罗克西 (Roxy)", scores: { resonance:7, freedom:7, restraint:7, mastery:2, insight:8, concealment:7, shaping:4, sensibility:8, self:5 }, desc: "你渴望一颗像她一样的心吗？她会对你说谢谢的。" },
+        { name: "弗雷德 (Fred)", scores: { resonance:6, freedom:8, restraint:8, mastery:1, insight:6, concealment:9, shaping:5, sensibility:8, self:4 }, desc: "也许你的心有些沉重。" },
+        { name: "雷娅拉 (Rayala)", scores: { resonance:4, freedom:4, restraint:5, mastery:7, insight:9, concealment:6, shaping:10, sensibility:5, self:2 }, desc: "对于智者而言，自我牺牲也是一种策略。" },
+        { name: "休伯特 (Hubert)", scores: { resonance:2, freedom:3, restraint:2, mastery:10, insight:9, concealment:2, shaping:8, sensibility:2, self:8 }, desc: "你要世人听你一言。" },
+        { name: "路克 (Luke)", scores: { resonance:5, freedom:8, restraint:2, mastery:10, insight:7, concealment:9, shaping:8, sensibility:10, self:10 }, desc: "为了更高尚的灵魂，焚烧你的肉身。" },
+        { name: "塞西莉亚 (Cecilia)", scores: { resonance:8, freedom:6, restraint:4, mastery:2, insight:6, concealment:1, shaping:5, sensibility:8, self:6 }, desc: "为自己庆贺，因为你一定是个好人。" },
+        { name: "埃洛伊丝 (Eloise)", scores: { resonance:10, freedom:8, restraint:0, mastery:9, insight:10, concealment:10, shaping:10, sensibility:10, self:10 }, desc: "世人皆笑你痴癫，你笑世人……" },
+        { name: "阿尔文·德莱尼 (Arvin Delaney)", scores: { resonance:5, freedom:10, restraint:9, mastery:1, insight:5, concealment:7, shaping:5, sensibility:8, self:2 }, desc: "谁迫使了你？" },
+        { name: "乌苏拉·赫斯 (Ursula Hess)", scores: { resonance:2, freedom:5, restraint:10, mastery:4, insight:10, concealment:9, shaping:8, sensibility:1, self:8 }, desc: "心灵之上有第三只眼。" },
+        { name: "海伦·本内特 (Helen Bennett)", scores: { resonance:8, freedom:6, restraint:6, mastery:5, insight:9, concealment:2, shaping:10, sensibility:8, self:6 }, desc: "你愿怀大爱以才干造福世人。" },
+        { name: "地球天使 (earthangel)", scores: { resonance:10, freedom:10, restraint:0, mastery:10, insight:10, concealment:0, shaping:10, sensibility:10, self:10 }, desc: "你恨他们。你恨他们？" },
+        { name: "旧愿 (frynwiln)", scores: { resonance:5, freedom:0, restraint:10, mastery:10, insight:10, concealment:10, shaping:10, sensibility:5, self:5 }, desc: "你太接近祂，要小心了……" },
+        { name: "塞勒斯·雷文 (Cyrus Raven)", scores: { resonance:1, freedom:10, restraint:5, mastery:6, insight:8, concealment:2, shaping:8, sensibility:7, self:9 }, desc: "你亦愿怀大爱以才干造福世人。可是你如何做到？" },
+        { name: "海莉 (Hailey)", scores: { resonance:9, freedom:8, restraint:4, mastery:2, insight:8, concealment:3, shaping:8, sensibility:7, self:4 }, desc: "生物的第一份本能指向母亲。人类的第二份本能指向朋友。" },
+        { name: "阿谱尔 (April)", scores: { resonance:9, freedom:9, restraint:5, mastery:8, insight:6, concealment:6, shaping:2, sensibility:4, self:1 }, desc: "惟愿你找到你。" },
+        { name: "尤金·罗伯特·希尔 (Eugene Robert Hills)", scores: { resonance:8, freedom:2, restraint:9, mastery:2, insight:7, concealment:9, shaping:1, sensibility:7, self:4 }, desc: "惟愿你找到方向。" },
+        { name: "霓虹 (Neon)", scores: { resonance:5, freedom:9, restraint:9, mastery:2, insight:7, concealment:10, shaping:5, sensibility:7, self:1 }, desc: "你是不是把自己想要的说给了别人听？" },
+        { name: "莫克斯 (Mox)", scores: { resonance:9, freedom:7, restraint:1, mastery:1, insight:6, concealment:0, shaping:5, sensibility:7, self:7 }, desc: "祝你幸福。" },
+        { name: "布伦达 (Brenda)", scores: { resonance:5, freedom:7, restraint:8, mastery:7, insight:7, concealment:8, shaping:7, sensibility:6, self:3 }, desc: "你值得比现在的生活更好的。" }
     ];
     
 const questions = [
@@ -345,6 +348,7 @@ const questions = [
 
         document.getElementById('similarity-score').innerText = finalPercentage;
         document.getElementById('res-name').innerText = bestMatch.name;
+        document.getElementById('res-desc').innerText = bestMatch.desc;
 
         document.getElementById('top-traits-tags').innerHTML = 
             `<span class="trait-tag">${traitNames[t1]}</span> <span class="trait-tag">${traitNames[t2]}</span>`;
