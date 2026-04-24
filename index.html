@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测测你是解构者宇宙里的谁？</title>
+    <style>
+        :root {
+            --sea-blue: #e0f2fe;     --deep-sea: #0ea5e9;     
+            --foam-white: rgba(255, 255, 255, 0.7); --text-main: #334155;    
+            --dot-color: #cbd5e1; --dot-active: #0ea5e9;
+        }
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+            color: var(--text-main); font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+        #app {
+            background: var(--foam-white); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5); width: 100%; max-width: 500px;
+            padding: 40px 25px; border-radius: 35px; box-shadow: 0 25px 50px rgba(14, 165, 233, 0.1); text-align: center;
+            transition: all 0.5s ease;
+        }
+        
+        /* 按钮与动画 */
+        .primary-btn { background: #0ea5e9; color: white; border: none; padding: 14px 35px; border-radius: 30px; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-weight: bold; box-shadow: 0 4px 15px rgba(14,165,233,0.3); letter-spacing: 1px; }
+        .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14,165,233,0.4); }
+        .pulse { animation: pulseAnim 1.5s infinite; color: #0369a1; }
+        @keyframes pulseAnim { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* 欢迎页 */
+        #intro-screen h1 { color: #0369a1; font-size: 1.8rem; margin-bottom: 5px; line-height: 1.4; }
+        .eng-title { font-size: 0.8rem; color: #7dd3fc; letter-spacing: 1px; margin-bottom: 40px; font-weight: bold; }
+        .notice { font-size: 0.75rem; color: #64748b; margin-top: 25px; line-height: 1.6; padding: 0 15px; }
+
+        /* 测试页 */
+        .progress-container { height: 6px; background: rgba(255, 255, 255, 0.4); border-radius: 3px; margin-bottom: 30px; overflow: hidden; }
+        #progress-bar { height: 100%; width: 0%; background: linear-gradient(to right, #7dd3fc, var(--deep-sea)); transition: width 0.5s ease; }
+      /* 文字在上方，并放宽字数限制以防过早转行 */
+        .labels-row { display: flex; justify-content: space-between; margin-bottom: 15px; padding: 0 5px; }
+        .scale-label { font-size: 0.9rem; color: #64748b; line-height: 1.6; font-weight: 500; width: 45%; } 
+        
+        /* 圆圈区域在下方 */
+        .scale-container { display: flex; flex-direction: column; margin-bottom: 20px; }
+        .dots-group { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 10px; position: relative; margin-top: 10px; }
+        .dots-group::before { content: ''; position: absolute; top: 50%; left: 10px; right: 10px; height: 2px; background: var(--dot-color); transform: translateY(-50%); z-index: 1; }
+        
+        /* 圆圈基础样式与选中状态 */
+        .dot-btn { border-radius: 50%; background: white; border: 3px solid var(--dot-color); cursor: pointer; z-index: 2; transition: 0.2s; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .dot-btn:hover { border-color: var(--deep-sea); }
+        .dot-selected { background: var(--deep-sea); border-color: var(--deep-sea); } /* 记录上一题选择的颜色 */
+        
+        /* 圆圈渐变大小：两边最大，中间最小 */
+        .dot-btn:nth-child(1), .dot-btn:nth-child(5) { width: 34px; height: 34px; }
+        .dot-btn:nth-child(2), .dot-btn:nth-child(4) { width: 26px; height: 26px; }
+        .dot-btn:nth-child(3) { width: 18px; height: 18px; }
+        
+        /* 结果样式 */
+        .trait-tag { display: inline-block; padding: 5px 15px; background: rgba(14, 165, 233, 0.1); border-radius: 20px; color: #0284c7; font-weight: bold; margin: 5px; font-size: 0.9rem; }
+        .trait-desc { font-size: 0.85rem; color: #64748b; text-align: left; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.3); border-radius: 12px; line-height: 1.6; }
+        #res-name { font-size: 2.4rem; color: #0369a1; margin: 10px 0; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(14,165,233,0.1); }
+        .similarity-label { font-size: 0.9rem; color: #888; font-weight: bold; }
+        .hidden { display: none !important; }
+        /* --- 手机端专属排版优化 --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px; /* 稍微缩小外部的留白 */
+                align-items: stretch; /* 允许内部卡片在垂直方向拉伸 */
+            }
+            #app {
+                display: flex;
+                flex-direction: column;
+                justify-content: center; /* 保证内部的文字和按钮依然居中 */
+                min-height: 92vh; /* 让玻璃卡片撑开，占据手机 92% 的可视高度 */
+                padding: 30px 20px;
+                border-radius: 25px; /* 手机屏幕小，圆角稍微收敛一点更精致 */
+            }
+            #question-area {
+                flex: 1; 
+                display: flex;
+              flex-direction: column;
+                justify-content: center; /* 让题目区域在宽裕的空间里居中 */
+            }
+            .scenario-box {
+                min-height: 120px; /* 让装题目的框框稍微大一点，填补视觉空白 */
+                margin-bottom: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="intro-screen">
+        <h1>测测你是解构者宇宙里的谁？</h1>
+        <p class="eng-title">Which Character Are You in Deconstructor's COSMOs?</p>
+        <button class="primary-btn" onclick="startLoading()">开始测试</button>
+        <p class="notice">注意事项：在测试的两种情况中，你应选择更有可能倾向的思维，并不代表你一定会那样想。</p>
+    </div>
+
+    <div id="loading-screen" class="hidden">
+        <h2 class="pulse">正在连接解构者...</h2>
+        <p style="font-size: 0.8rem; color: #7dd3fc; letter-spacing: 2px; margin-top: 10px; font-weight: bold;">Connecting Rechael</p>
+    </div>
+    
+    <div id="quiz-screen" class="hidden">
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        
+        <div id="question-area">
+            <p style="font-size: 0.75rem; color: #7dd3fc; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px;">NEURAL FLOW SYNCING</p>
+            <div class="scenario-box" id="scenario-text">加载中...</div>
+            
+            <div class="scale-container" id="scale-area">
+                <div class="labels-row">
+                    <div class="scale-label" id="label-left" style="text-align: left;"></div>
+                    <div class="scale-label" id="label-right" style="text-align: right;"></div>
+                </div>
+                <div class="dots-group" id="dots-group">
+                    <button class="dot-btn" onclick="handleSelect(1)"></button>
+                    <button class="dot-btn" onclick="handleSelect(2)"></button>
+                    <button class="dot-btn" onclick="handleSelect(3)"></button>
+                    <button class="dot-btn" onclick="handleSelect(4)"></button>
+                    <button class="dot-btn" onclick="handleSelect(5)"></button>
+                </div>
+            </div>
+            <p id="hint-text" style="font-size: 0.7rem; color: #94a3b8; margin-top: 10px;">请基于潜意识本能选择你的倾向</p>
+            
+            <button id="prev-btn" onclick="goPrev()" class="hidden" style="margin-top: 15px; background: none; border: 1px solid #cbd5e1; padding: 8px 20px; border-radius: 20px; color: #64748b; cursor: pointer; transition: 0.3s;">返回上一题</button>
+        </div>
+
+        <div id="submit-area" class="hidden" style="margin-top: 30px;">
+            <p style="color: #0369a1; font-size: 1.1rem; margin-bottom: 30px; font-weight: 500;">所有维度数据已记录完毕。</p>
+            <button class="primary-btn" onclick="finish()">提交并生成解析</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <p class="similarity-label">溯源完成 | 契合度 <span id="similarity-score"></span>%</p>
+        <h1 id="res-name"></h1>
+        <div id="trait-analysis-area">
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px; margin-top: 25px;">核心意识特征：</p>
+            <div id="top-traits-tags"></div>
+            <div id="top-traits-desc"></div>
+        </div>
+        <button class="primary-btn" onclick="location.reload()" style="margin-top: 35px; background: white; color: #0ea5e9; border: 2px solid #e0f2fe;">重新连入</button>
+    </div>
+</div>
+
+<script>
+    // --- 数据配置区 ---
+    const traitNames = {
+        resonance: "共振", freedom: "自由", restraint: "克制", mastery: "掌控",
+        insight: "洞察", concealment: "隐匿", shaping: "塑造", sensibility: "感性", self: "自我"
+    };
+
+    const traitDict = {
+        resonance: "你的生命应与人类的情感共振。共振是爱。",
+        freedom: "你渴望自由？你已经拥有自由？人人为之祈祷，自由是希望。",
+        restraint: "你一直听到你的心里有一个声音，但你从来没有将它宣之于口。克制是压抑。",
+        mastery: "想要实现某些东西，你必须要有帮助你实现的操控力。掌控是欲望的手段。",
+        insight: "用眼睛去看，用耳朵去听，用手去触碰，用心去感受。洞察是柔软的智慧。",
+        concealment: "有些人选择隐藏社会身份，避世不出；有些人选择隐藏哲学身份，封闭内心。隐匿是回避。",
+        shaping: "上帝在第七天创造了人，人要用一生去创造自己。塑造是构建。",
+        sensibility: "感知然后收纳，收纳然后怜惜，怜惜然后为之付出。感性是共情。",
+        self: "一指自己，二指自己对自己，三指自己肯定自己，四指相偶相依。自我是世界的最中心。"
+    };
+
+    const characters = [
+        { name: "罗克西 (Roxy)", scores: { resonance:7, freedom:7, restraint:7, mastery:2, insight:8, concealment:7, shaping:4, sensibility:8, self:5 } },
+        { name: "弗雷德 (Fred)", scores: { resonance:6, freedom:8, restraint:8, mastery:1, insight:6, concealment:9, shaping:5, sensibility:8, self:4 } },
+        { name: "雷娅拉 (Rayala)", scores: { resonance:4, freedom:4, restraint:5, mastery:7, insight:9, concealment:6, shaping:10, sensibility:5, self:2 } },
+        { name: "休伯特 (Hubert)", scores: { resonance:2, freedom:3, restraint:2, mastery:10, insight:9, concealment:2, shaping:8, sensibility:2, self:8 } },
+        { name: "路克 (Luke)", scores: { resonance:5, freedom:8, restraint:2, mastery:10, insight:7, concealment:9, shaping:8, sensibility:10, self:10 } },
+        { name: "塞西莉亚 (Cecilia)", scores: { resonance:8, freedom:6, restraint:4, mastery:2, insight:6, concealment:1, shaping:5, sensibility:8, self:6 } },
+        { name: "埃洛伊丝 (Eloise)", scores: { resonance:10, freedom:8, restraint:0, mastery:9, insight:10, concealment:10, shaping:10, sensibility:10, self:10 }, isDivine: true },
+        { name: "阿尔文·德莱尼 (Arvin Delaney)", scores: { resonance:5, freedom:10, restraint:9, mastery:1, insight:5, concealment:7, shaping:5, sensibility:8, self:2 } },
+        { name: "乌苏拉·赫斯 (Ursula Hess)", scores: { resonance:2, freedom:5, restraint:10, mastery:4, insight:10, concealment:9, shaping:8, sensibility:1, self:8 } },
+        { name: "海伦·本内特 (Helen Bennett)", scores: { resonance:8, freedom:6, restraint:6, mastery:5, insight:9, concealment:2, shaping:10, sensibility:8, self:6 } },
+        { name: "地球天使 (earthangel)", scores: { resonance:10, freedom:10, restraint:0, mastery:10, insight:10, concealment:0, shaping:10, sensibility:10, self:10 }, isDivine: true },
+        { name: "旧愿 (frynwiln)", scores: { resonance:5, freedom:0, restraint:10, mastery:10, insight:10, concealment:10, shaping:10, sensibility:5, self:5 } },
+        { name: "塞勒斯·雷文 (Cyrus Raven)", scores: { resonance:1, freedom:10, restraint:5, mastery:6, insight:8, concealment:2, shaping:8, sensibility:7, self:9 } },
+        { name: "海莉 (Hailey)", scores: { resonance:9, freedom:8, restraint:4, mastery:2, insight:8, concealment:3, shaping:8, sensibility:7, self:4 } },
+        { name: "阿谱尔 (April)", scores: { resonance:9, freedom:9, restraint:5, mastery:8, insight:6, concealment:6, shaping:2, sensibility:4, self:1 } },
+        { name: "尤金·罗伯特·希尔 (Eugene Robert Hills)", scores: { resonance:8, freedom:2, restraint:9, mastery:2, insight:7, concealment:9, shaping:1, sensibility:7, self:4 } },
+        { name: "霓虹 (Neon)", scores: { resonance:5, freedom:9, restraint:9, mastery:2, insight:7, concealment:10, shaping:5, sensibility:7, self:1 } }
+    ];
+    
+const questions = [
+        { q: "关于内心的欲望：", L: "无论好坏，它是我的一部分，我需要接纳", R: "欲望总是和罪恶相连，我想要消解它", tL: ["self"], tR: ["restraint"] },
+        { q: "假如你可以脱离现状过上彻底自由的人生，但再也没法重新回到现在：", L: "我已等待这个机会多时", R: "我愿珍惜现在所有", tL: ["freedom"], tR: ["resonance"] },
+        { q: "在你出生的那一刻，上天就赐予了你独一无二的天赋：", L: "是的，我愿尽可能发挥它的作用", R: "不是的，也许我还没找到我命中注定的事业", tL: ["shaping"], tR: ["concealment"] },
+        { q: "如果你感到孤独，那可能是：", L: "我空虚的灵魂一隅", R: "社会上的人都如此", tL: ["sensibility", "concealment"], tR: ["restraint"] },
+        { q: "你深知你性格中有一份不完美：", L: "不，我还没有看到", R: "是的，也许吧，我不会改变它", tL: ["concealment"], tR: ["self"] },
+        { q: "目睹一个有人正在受难的故事让你感到：", L: "肉体痛苦不在我的身上，但我的心也为之疼痛", R: "希望它永远不要降临在我的熟人身上", tL: ["sensibility"], tR: ["resonance", "self"] },
+        { q: "这个世界的规则背后往往都有复杂的逻辑：", L: "也许它们不合理，应该被改变", R: "是的，我会想要探究它从何而来", tL: ["mastery"], tR: ["insight"] },
+        { q: "捕捉到人群中潜藏的某种集体焦虑时：", L: "它们来自哪里？", R: "我害怕它们影响我", tL: ["insight"], tR: ["concealment"] },
+        { q: "看到一种带有野性的新生事物来势汹汹时：", L: "也许我们需要再想想它背后的潜藏风险", R: "我愿意接纳它的发展", tL: ["insight", "shaping"], tR: ["freedom"] },
+        { q: "在文艺作品里阅读到极端的爱恨，你倾向于：", L: "这是一种艺术化的夸张处理", R: "也许社会上的人本性如此，只是大部分人并未表露", tL: ["concealment", "restraint"], tR: ["self", "mastery"] },
+        { q: "在一个混乱、急需决策的集体环境中：", L: "我愿意站出来，为集体指引方向", R: "系统就是这样，等等就好", tL: ["mastery"], tR: ["concealment", "freedom"] },
+        { q: "当你的身份或行为被大众高度关注并审视时：", L: "我有些焦虑，我讨厌被人关注", R: "我可以应对", tL: ["concealment", "sensibility"], tR: ["self", "insight"] },
+        { q: "在处理那些涉及多人、错综复杂的利益冲突时：", L: "好好观察，层层剖析再作出决定", R: "我在情感上有明确的站队", tL: ["insight"], tR: ["resonance", "sensibility"] },
+        { q: "面对一份需要你长期投入心力的亲密关系时：", L: "我投入，但也从中得到爱，情绪是相互的", R: "也许我们可以给彼此更多空间", tL: ["resonance"], tR: ["freedom"] },
+        { q: "你知道社会是不会有救的，是吗？", L: "是的，但我仍抱有希望", R: "也许吧，走一步看一步", tL: ["resonance"], tR: ["concealment"] },
+        { q: "当你获得了一项可以改变局部规则的微小权力时：", L: "用它来确保事物按我的意志运行", R: "用它来修补和完善现有的结构", tL: ["mastery"], tR: ["shaping"] },
+        { q: "面对可以实现内心深处渴望的机会（结果好坏参半）：", L: "若有可能发生坏结果，渴望就不该被实现", R: "既然是我的渴望，我想顺从直觉体验", tL: ["restraint"], tR: ["sensibility"] },
+        { q: "翻开笔记本的第一页，你想要写下：", L: "我的故事、思维、理念", R: "我的情绪、观察、愿望", tL: ["shaping"], tR: ["resonance"] }
+    ];
+
+// --- 核心引擎 ---
+    let curIdx = 0;
+    let userChoices = new Array(questions.length).fill(null); // 新增：用一个数组记录测试者每道题选了什么
+
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+
+    function startLoading() {
+        const btn = document.getElementById('start-btn');
+        if (btn) btn.disabled = true; 
+        
+        hide('intro-screen');
+        show('loading-screen');
+        
+        setTimeout(function() {
+            try {
+                hide('loading-screen');
+                show('quiz-screen');
+                render();
+            } catch (e) {
+                document.getElementById('loading-text').innerText = "同步失败，请刷新页面";
+            }
+        }, 1500); 
+    }
+
+    function render() {
+        const q = questions[curIdx];
+        if (!q) return;
+        
+        document.getElementById('scenario-text').innerHTML = q.q;
+        document.getElementById('label-left').innerHTML = q.L;
+        document.getElementById('label-right').innerHTML = q.R;
+        document.getElementById('progress-bar').style.width = (curIdx / questions.length * 100) + '%';
+        
+        // 控制“返回上一题”按钮：第一题不显示，后面的题显示
+        if (curIdx > 0) show('prev-btn');
+        else hide('prev-btn');
+
+        // 核心功能：恢复上一次选择的圆圈高亮颜色
+        const dots = document.getElementById('dots-group').children;
+        for(let i = 0; i < dots.length; i++) {
+            dots[i].classList.remove('dot-selected');
+            if (userChoices[curIdx] === i + 1) {
+                dots[i].classList.add('dot-selected');
+            }
+        }
+    }
+
+    // 新增：返回上一题的逻辑
+    function goPrev() {
+        if (curIdx > 0) {
+            curIdx--;
+            // 确保把可能出现的“提交”页面藏起来，显示回题目页面
+            hide('submit-area');
+            show('scenario-text');
+            show('scale-area');
+            show('hint-text');
+            render();
+        }
+    }
+
+    function handleSelect(choice) {
+        // 不再立即算分，而是把选项存进本子里
+        userChoices[curIdx] = choice;
+
+        curIdx++;
+        if (curIdx < questions.length) {
+            render();
+        } else {
+            document.getElementById('progress-bar').style.width = '100%';
+            hide('scenario-text');
+            hide('scale-area');
+            hide('hint-text');
+            hide('prev-btn'); // 最后一题答完隐藏返回按钮
+            show('submit-area');
+        }
+    }
+
+    function finish() {
+        hide('quiz-screen');
+        show('result-screen');
+
+        // 提交时，开始统一算分
+        let scores = { resonance:0, freedom:0, restraint:0, mastery:0, insight:0, concealment:0, shaping:0, sensibility:0, self:0 };
+        
+        for (let i = 0; i < questions.length; i++) {
+            let choice = userChoices[i];
+            let q = questions[i];
+            if (!choice) continue;
+
+            if (choice < 3) {
+                let pts = choice === 1 ? 2 : 1;
+                q.tL.forEach(t => scores[t] += pts);
+            } else if (choice > 3) {
+                let pts = choice === 5 ? 2 : 1;
+                q.tR.forEach(t => scores[t] += pts);
+            }
+        }
+
+        // 封顶处理与后续匹配逻辑保持不变
+        for (let k in scores) if (scores[k] > 10) scores[k] = 10;
+
+        let sortedTraits = Object.keys(scores).sort((a,b) => scores[b] - scores[a]);
+        let t1 = sortedTraits[0], t2 = sortedTraits[1];
+
+        let totalScoreSum = Object.values(scores).reduce((a,b) => a+b, 0);
+        let bestMatch = null;
+        let minDistance = Infinity;
+
+        characters.forEach(char => {
+            if (char.isDivine && totalScoreSum < 45) return; 
+
+            let dist = 0;
+            for (let k in scores) {
+                dist += Math.pow(scores[k] - char.scores[k], 2);
+            }
+            dist = Math.sqrt(dist);
+            if (dist < minDistance) {
+                minDistance = dist;
+                bestMatch = char;
+            }
+        });
+
+        let similarity = Math.round(Math.max(0, 100 * (1 - minDistance / 25))); 
+        document.getElementById('similarity-score').innerText = similarity;
+        document.getElementById('res-name').innerText = bestMatch.name;
+
+        document.getElementById('top-traits-tags').innerHTML = 
+            `<span class="trait-tag">${traitNames[t1]}</span> <span class="trait-tag">${traitNames[t2]}</span>`;
+        document.getElementById('top-traits-desc').innerHTML = 
+            `<div class="trait-desc"><b>${traitNames[t1]}：</b>${traitDict[t1]}</div>` +
+            `<div class="trait-desc"><b>${traitNames[t2]}：</b>${traitDict[t2]}</div>`;
+    }
+</script>
+</body>
+</html>
